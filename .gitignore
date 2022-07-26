@@ -1,2 +1,4 @@
 build
 .vscode
+reference_projects
+components/wifi/ww_wifi_creds.hpp
