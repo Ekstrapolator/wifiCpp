@@ -18,17 +18,25 @@ extern "C"{
 }
 
 
-
+void task(void* arg)
+{
+    for(;;)
+    {
+        vTaskDelay(400);
+    }
+}
 
 
 void app_main(void)
 {
-    Event* event = new Event;
     Wifi wifi;
-    //wifi.set_event_handler();
-    wifi.set_event_handler(event);
     wifi.init_sta(WIFI_MODE_STA, SSID, PASSWORD);
     printf("Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
 
+    for(;;)
+    {
+        printf("im not dead \n");
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
 
 }
