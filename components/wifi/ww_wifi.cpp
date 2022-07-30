@@ -1,9 +1,12 @@
 #include "ww_wifi.hpp"
 
+static const char *WIFI = "WIFI: ";
+
 Wifi::Wifi(/* args */)
 {
     m_initCalled = false;
-
+    m_stopComInit = false;
+    m_reConnectAttempts{0};
 }
 
 Wifi::~Wifi()
@@ -12,7 +15,7 @@ Wifi::~Wifi()
 
 void Wifi::event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
-    switch (event_id)
+    switch (event_id) // przerobic na if  ?
     {
     case WIFI_EVENT_STA_START:
         esp_wifi_connect();
@@ -43,8 +46,6 @@ void Wifi::init_sta(wifi_mode_t wifi_mode, const std::string& ssid, const std::s
     initError = nvs_flash_init();
     initError = esp_wifi_set_storage(WIFI_STORAGE_RAM);
 
-    
-
     wifi_init_config_t init_cfg = WIFI_INIT_CONFIG_DEFAULT();
     initError = esp_wifi_init(&init_cfg);
 
@@ -71,5 +72,20 @@ void Wifi::init_sta(wifi_mode_t wifi_mode, const std::string& ssid, const std::s
     initError = esp_wifi_start();
     ESP_ERROR_CHECK(initError);
     m_initCalled = true;
-    ESP_LOGI("WIFI", "TEST");
+    
+}
+
+void Wifi::stop()
+{
+    esp_err_t stopError;
+    ESP_LOGI(WIFI, "STOP");
+    stopError = esp_wifi_stop();
+    ESP_ERROR_CHECK(stopError);
+    m_stopComInit = true;
+
+}
+
+void Wifi::reConnect()
+{
+    
 }

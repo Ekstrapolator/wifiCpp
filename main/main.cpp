@@ -32,6 +32,8 @@ void app_main(void)
     Wifi wifi;
     wifi.init_sta(WIFI_MODE_STA, SSID, PASSWORD);
     printf("Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    wifi.stop();
 
     for(;;)
     {
