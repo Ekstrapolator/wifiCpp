@@ -9,6 +9,7 @@
 
 #include "../components/wifi/ww_wifi.hpp"
 #include "../components/wifi/ww_wifi_creds.hpp"
+#include "../components/sntp/ww_sntp.hpp"
 #include "event.hpp"
 
 
@@ -29,9 +30,20 @@ void task(void* arg)
 
 void app_main(void)
 {
+    esp_err_t ret = nvs_flash_init();
+     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
     wifi::init_sta(WIFI_MODE_STA, SSID, PASSWORD);
+    wifi::block_until_wifi_ready();
+
+    sntp::get_time_from_sntp();
+    sntp::block_until_time_ready();
+
     printf("Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
-    vTaskDelay(pdMS_TO_TICKS(5000));
     
 
     for(;;)
@@ -40,4 +52,4 @@ void app_main(void)
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
-}
+} //Main task that simply calls app_main. This task will self delete when app_main returns
