@@ -1,7 +1,6 @@
 #pragma once
 
 #include <esp_log.h>
-#include <nvs_flash.h>
 #include <cstring>
 #include <string>
 #include <esp_wifi.h>

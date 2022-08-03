@@ -3,3 +3,4 @@ build
 reference_projects
 components/wifi/ww_wifi_creds.hpp
 notes.txt
+ble_config_screens

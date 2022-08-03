@@ -6,10 +6,12 @@
 #include <esp_chip_info.h>
 #include <esp_flash.h>
 #include <esp_wifi.h>
+#include <nvs_flash.h>
 
 #include "../components/wifi/ww_wifi.hpp"
 #include "../components/wifi/ww_wifi_creds.hpp"
 #include "../components/sntp/ww_sntp.hpp"
+#include "../components/ble/ww_ble.hpp"
 #include "event.hpp"
 
 
@@ -42,6 +44,8 @@ void app_main(void)
 
     sntp::get_time_from_sntp();
     sntp::block_until_time_ready();
+
+    ble::init();
 
     printf("Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
     
