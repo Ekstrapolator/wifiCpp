@@ -45,7 +45,9 @@ void app_main(void)
     sntp::get_time_from_sntp();
     sntp::block_until_time_ready();
 
-    ble::init();
+    ret = ble::init();
+    if (ret == ESP_OK)
+        ble::scan();
 
     printf("Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
     

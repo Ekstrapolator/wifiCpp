@@ -4,9 +4,40 @@ static const char *TAG = "BLE: ";
 
 static void ble_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
 {
+    uint32_t duration = 2;
+
     switch (event)
     {
-        case ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT:
+    case ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT:
+        // the unit of the duration is second, 0 means scan permanently have to manual stop "esp_ble_gap_stop_scanning"
+        if (param->scan_param_cmpl.status == ESP_BT_STATUS_SUCCESS)
+            esp_ble_gap_start_scanning(duration);
+        else
+            ESP_LOGI(TAG, "ADAPTER INITIALIZATION ERROR");
+        break;
+    
+    case ESP_GAP_BLE_SCAN_START_COMPLETE_EVT:
+        if (param->scan_start_cmpl.status == ESP_BT_STATUS_SUCCESS)
+            ESP_LOGI(TAG, "SCAN STARTED");
+        else
+            ESP_LOGI(TAG, "SCAN FAILED");
+        break;
+
+    case ESP_GAP_BLE_UPDATE_WHITELIST_COMPLETE_EVT:
+        if (param->update_whitelist_cmpl.wl_operation == ESP_BLE_WHITELIST_ADD)
+            ESP_LOGI(TAG, "WHITE LIST UPDATED SUCESS");
+        else
+            ESP_LOGI(TAG, "FAILED TO UPDATE");
+        break;
+
+    case ESP_GAP_BLE_SCAN_RESULT_EVT:
+
+
+        break;
+
+    default:
+        ESP_LOGI(TAG, "EVENT %d UNHANDLED\n", event);
+        break;
     }
 }
 
