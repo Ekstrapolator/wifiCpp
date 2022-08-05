@@ -55,7 +55,7 @@ void app_main(void)
     for(;;)
     {
         printf("im not dead \n");
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(30000));
     }
 
 } //Main task that simply calls app_main. This task will self delete when app_main returns

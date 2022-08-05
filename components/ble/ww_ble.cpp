@@ -2,9 +2,20 @@
 
 static const char *TAG = "BLE: ";
 
+std::vector<ble::Sensor> sensor_vec = {
+    {"lazienka", {0xA4, 0xC1, 0x38, 0x07, 0x43, 0x7B}, 0, 0, 0, 0},
+    {"sypialnia", {0xA4, 0xC1, 0x38, 0x71, 0x86, 0xE4}, 0, 0, 0, 0},
+    {"balkon", {0xA4, 0xC1, 0x38, 0xA4, 0xFA, 0x78}, 0, 0, 0, 0},
+    {"kuchnia", {0xA4, 0xC1, 0x38, 0x56, 0x3E, 0xD4}, 0, 0, 0, 0}
+
+};
+
+static void check_if_sensor_alredy_found(esp_ble_gap_cb_param_t *param);
+static bool check_if_all_sensor_ready(std::vector<ble::Sensor> &sensor_vec);
+
 static void ble_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
 {
-    uint32_t duration = 2;
+    uint32_t duration = 0;
 
     switch (event)
     {
@@ -31,7 +42,9 @@ static void ble_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
         break;
 
     case ESP_GAP_BLE_SCAN_RESULT_EVT:
-
+        
+        check_if_sensor_alredy_found(param);
+        check_if_all_sensor_ready(sensor_vec);
 
         break;
 
@@ -41,13 +54,49 @@ static void ble_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
     }
 }
 
-esp_err_t ble::init()
+void check_if_sensor_alredy_found(esp_ble_gap_cb_param_t *param)
 {
-    esp_bd_addr_t sypialnia = {0xA4, 0xC1, 0x38, 0x71, 0x86, 0xE4};
-    esp_bd_addr_t balkon = {0xA4, 0xC1, 0x38, 0xA4, 0xFA, 0x78};
-    esp_bd_addr_t lazienka = {0xA4, 0xC1, 0x38, 0x07, 0x43, 0x7B};
-    esp_bd_addr_t kuchnia = {0xA4, 0xC1, 0x38, 0x56, 0x3E, 0xD4};
-
+    for (auto it = sensor_vec.begin(); it != sensor_vec.end(); it++)
+    {
+        if (param->scan_rst.bda[3] == it->address[3] && it->alredyFound == false)
+        {
+            int temp{0};
+            float float_temp{0};
+            temp = param->scan_rst.ble_adv[10] << 8;
+            temp = temp | param->scan_rst.ble_adv[11];
+            float_temp = (float)temp / 10;
+            if (param->scan_rst.ble_adv[13] < 100 && param->scan_rst.ble_adv[13] > 0 && 
+                param->scan_rst.ble_adv[12] < 100 && param->scan_rst.ble_adv[12] > 0 &&
+                float_temp > -20 && float_temp < 100)
+                {
+                    it->battery = param->scan_rst.ble_adv[13];
+                    it->humidity = param->scan_rst.ble_adv[12];
+                    it->temperature = float_temp;
+                    it->alredyFound = true;
+                    ESP_LOGW(TAG, "%s", (it->name).c_str());
+                }
+            break;
+        }
+    }
+}
+bool check_if_all_sensor_ready(std::vector<ble::Sensor> &sensor_vec)
+{
+    int sum{0};
+    for (auto it = sensor_vec.begin(); it != sensor_vec.end(); it++)
+    {
+        sum += it->alredyFound;
+    }
+    if (sum == sensor_vec.size())
+    {
+        esp_ble_gap_stop_scanning();
+        ESP_LOGI(TAG, "FOUND ALL SENSOR STOP SCANNING");
+        return true;
+    }
+      
+    return false;
+}
+esp_err_t ble::init()
+{   
     esp_err_t initError;
     initError = esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
     if (initError)
@@ -71,20 +120,14 @@ esp_err_t ble::init()
     initError = esp_ble_gap_clear_whitelist();
     if (initError != ESP_OK)
         return initError;
-    initError = esp_ble_gap_update_whitelist(ESP_BLE_WHITELIST_ADD, sypialnia, BLE_WL_ADDR_TYPE_PUBLIC);
-    if (initError != ESP_OK)
-        return initError;
-    initError = esp_ble_gap_update_whitelist(ESP_BLE_WHITELIST_ADD, balkon, BLE_WL_ADDR_TYPE_PUBLIC);
-    if (initError != ESP_OK)
-        return initError;
-    initError = esp_ble_gap_update_whitelist(ESP_BLE_WHITELIST_ADD, lazienka, BLE_WL_ADDR_TYPE_PUBLIC);
-    if (initError != ESP_OK)
-        return initError;
-    initError = esp_ble_gap_update_whitelist(ESP_BLE_WHITELIST_ADD, kuchnia, BLE_WL_ADDR_TYPE_PUBLIC);
-    if (initError != ESP_OK)
-        return initError;
 
-    
+    for (auto it = sensor_vec.begin(); it != sensor_vec.end(); it++)
+    {
+        initError = esp_ble_gap_update_whitelist(ESP_BLE_WHITELIST_ADD, it->address, BLE_WL_ADDR_TYPE_PUBLIC);
+        if (initError != ESP_OK)
+            return initError;
+    }
+
     return ESP_OK;
 
 }
