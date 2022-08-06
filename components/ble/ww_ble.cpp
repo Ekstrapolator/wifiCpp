@@ -10,7 +10,7 @@ std::vector<ble::Sensor> sensor_vec = {
 
 };
 
-static void check_if_sensor_alredy_found(esp_ble_gap_cb_param_t *param);
+static void check_if_sensor_alredy_found(esp_ble_gap_cb_param_t *param, std::vector<ble::Sensor> &sensor_vec);
 static bool check_if_all_sensor_ready(std::vector<ble::Sensor> &sensor_vec);
 
 static void ble_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
@@ -43,7 +43,7 @@ static void ble_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
 
     case ESP_GAP_BLE_SCAN_RESULT_EVT:
         
-        check_if_sensor_alredy_found(param);
+        check_if_sensor_alredy_found(param, sensor_vec);
         check_if_all_sensor_ready(sensor_vec);
 
         break;
@@ -54,7 +54,7 @@ static void ble_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
     }
 }
 
-void check_if_sensor_alredy_found(esp_ble_gap_cb_param_t *param)
+void check_if_sensor_alredy_found(esp_ble_gap_cb_param_t *param, std::vector<ble::Sensor> &sensor_vec)
 {
     for (auto it = sensor_vec.begin(); it != sensor_vec.end(); it++)
     {
@@ -89,6 +89,10 @@ bool check_if_all_sensor_ready(std::vector<ble::Sensor> &sensor_vec)
     if (sum == sensor_vec.size())
     {
         esp_ble_gap_stop_scanning();
+        for (auto it = sensor_vec.begin(); it != sensor_vec.end(); it++)
+        {
+            it->alredyFound = false;
+        }
         ESP_LOGI(TAG, "FOUND ALL SENSOR STOP SCANNING");
         return true;
     }
