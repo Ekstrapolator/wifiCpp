@@ -7,7 +7,7 @@
 #define FIVE_SECONDS 5000 / portTICK_PERIOD_MS
 #define THREE_SECOND 3000 / portTICK_PERIOD_MS
 
-static const char *TAG = "WIFI: ";
+static const char *TAG = "WIFI";
 
 wifi::WifiState wifiState = {
     0, 0, 0, 0, 0

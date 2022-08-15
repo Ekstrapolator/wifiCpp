@@ -1,6 +1,6 @@
 #include "ww_ble.hpp"
 
-static const char *TAG = "BLE: ";
+static const char *TAG = "BLE";
 
 std::vector<ble::Sensor> sensor_vec = {
     {"lazienka", {0xA4, 0xC1, 0x38, 0x07, 0x43, 0x7B}, 0, 0, 0, 0},
