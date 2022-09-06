@@ -52,12 +52,12 @@ void app_main(void)
         ble::scan();
 
     tpcClientQueue = xQueueCreate(10, sizeof(ble::Sensor));
-    xTaskCreate(tcp::client_task_main_function, "tcpClientTask", 1024*5, NULL, 2, &tcpClientTaskMainFunctionHeandle); //(void *)tpcClientQueue
-    
+    xTaskCreate(tcp::client_task_main_function, "tcpClientTask", 1024*5, tpcClientQueue, 2, &tcpClientTaskMainFunctionHeandle); //(void *)tpcClientQueue
+    printf("Queue head adress from main %X \n", tpcClientQueue);
 
     for(;;)
     {
-        printf("Free memory heap: %d kB\n", esp_get_free_heap_size());
+        printf("Free memory heap: %d kB \n", esp_get_free_heap_size());
         vTaskDelay(pdMS_TO_TICKS(30000));
     }
 
